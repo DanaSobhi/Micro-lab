@@ -1,0 +1,51 @@
+
+		PRESERVE8
+		THUMB
+
+		AREA RESET, DATA, READONLY
+		EXPORT __Vectors
+__Vectors
+	DCD 0x20001000 ; stack pointer value when stack is empty
+		DCD Reset_Handler ; reset vector
+		ALIGN
+;Your Data section
+;AREA DATA
+string1
+		DCB "applep",0
+string2
+		DCB "application",0
+result
+		DCB "",0		
+
+		
+	
+			AREA MYCODE, CODE, READONLY
+		ENTRY
+		EXPORT Reset_Handler
+Reset_Handler			
+        movs r0, #0        ; Index for result array
+        ldr r1, =string1   ; Load address of string1
+        ldr r2, =string2   ; Load address of string2
+        ldr r6, =result    ; Load address of result array
+
+compare_loop
+        ldrb r3, [r1], #1  ; Load a character from string1 and increment address
+        mov r4, r2         ; Copy address of string2 to r4
+
+search_loop
+        ldrb r5, [r4], #1  ; Load a character from string2 and increment address
+        cmp r3, r5         ; Compare characters from string1 and string2
+        bne not_equal      ; Branch if characters are not equal
+        strb r3, [r6], #1  ; Store common character in result array and increment index
+
+not_equal
+        cbz r5, end_search ; If end of string2 is reached, exit search loop
+        b search_loop      ; Otherwise, continue searching
+
+end_search
+        cbz r3, end_compare ; If end of string1 is reached, exit compare loop
+        b compare_loop     ; Otherwise, continue comparing
+
+end_compare;
+        
+END

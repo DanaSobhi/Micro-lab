@@ -1,0 +1,81 @@
+/* This is a timer interrupt example code of TM4C123 Tiva C Launchpad */
+/* Generates a delay of one second using Timer1A interrupt handler routine */
+#include "TM4C123.h" // Device header file for Tiva Series Microcontroller
+#define Green (1<<3) // PF3 pin of TM4C123 Tiva Launchpad, Green LED
+#define Blue (1<<2) // PF3 pin of TM4C123 Tiva Launchpad, Blue LED
+#define Red (1<<1) // PF3 pin of TM4C123 Tiva Launchpad, Red LED
+void Time3A_10sec_delay(void)
+{
+	SYSCTL->RCGCTIMER |= (1<<3); /*enable clock Timer1 subtimer A in run mode */
+	TIMER3->CTL = 0; /* disable timer1 output */
+	TIMER3->CFG = 0x0; /*select 32-bit configuration option */
+	TIMER3->TAMR = 0x02; /*select periodic down counter mode of timer1 */
+	//TIMER1->TAPR = 250-1; /* TimerA prescaler value */
+	TIMER3->TAILR = 160000000-1 ; /* TimerA counter starting count down value */
+	TIMER3->ICR = 0x1; /* TimerA timeout flag bit clears*/
+	TIMER3->IMR |=(1<<0); /*enables TimerA time-out interrupt mask */
+	TIMER3->CTL |= 0x01; /* Enable TimerA module */
+	NVIC->ISER[1] |= (1<<3); /*enable IRQ21 */
+}
+void Time2A_5sec_delay(void)
+{
+	SYSCTL->RCGCTIMER |= (1<<2); /*enable clock Timer1 subtimer A in run mode */
+	TIMER2->CTL = 0; /* disable timer1 output */
+	TIMER2->CFG = 0x0; /*select 32-bit configuration option */
+	TIMER2->TAMR = 0x02; /*select periodic down counter mode of timer1 */
+	//TIMER1->TAPR = 250-1; /* TimerA prescaler value */
+	TIMER2->TAILR = 80000000-1 ; /* TimerA counter starting count down value */
+	TIMER2->ICR = 0x1; /* TimerA timeout flag bit clears*/
+	TIMER2->IMR |=(1<<0); /*enables TimerA time-out interrupt mask */
+	TIMER2->CTL |= 0x01; /* Enable TimerA module */
+	NVIC->ISER[0] |= (1<<23); /*enable IRQ21 */
+}
+void Time1A_1sec_delay(void)
+{
+SYSCTL->RCGCTIMER |= (1<<1); /*enable clock Timer1 subtimer A in run mode */
+TIMER1->CTL = 0; /* disable timer1 output */
+TIMER1->CFG = 0x4; /*select 16-bit configuration option */
+TIMER1->TAMR = 0x02; /*select periodic down counter mode of timer1 */
+TIMER1->TAPR = 250-1; /* TimerA prescaler value */
+TIMER1->TAILR = 64000-1 ; /* TimerA counter starting count down value */
+TIMER1->ICR = 0x1; /* TimerA timeout flag bit clears*/
+TIMER1->IMR |=(1<<0); /*enables TimerA time-out interrupt mask */
+TIMER1->CTL |= 0x01; /* Enable TimerA module */
+NVIC->ISER[0] |= (1<<21); /*enable IRQ21 */
+}
+
+
+int main(void)
+{
+	/*Initialize PF3 as a digital output pin */
+	 SYSCTL->RCGCGPIO |= 0x20; // turn on bus clock for GPIOF
+	 GPIOF->DIR |= 0x0e; // set blue pin as a digital output pin
+	 GPIOF->DEN |= 0x0e; // Enable PF2 pin as a digital pin
+	
+	 Time1A_1sec_delay();
+	 Time2A_5sec_delay();
+	 Time3A_10sec_delay();
+		while(1)
+		{
+		}
+}
+/* Timer1 subtimer A interrupt service routine */
+
+void TIMER1A_Handler()
+{
+	 if(TIMER1->MIS & 0x1)
+	GPIOF->DATA ^= Red; /* toggle Blue LED*/
+	TIMER1->ICR = 0x1; /* Timer1A timeout flag bit clears*/	 
+}
+void TIMER2A_Handler()
+{
+	 if(TIMER2->MIS & 0x1)
+	GPIOF->DATA ^= Green; /* toggle Blue LED*/
+	TIMER2->ICR = 0x1; /* Timer1A timeout flag bit clears*/	 
+}
+void TIMER3A_Handler()
+{
+	 if(TIMER3->MIS & 0x1)
+	GPIOF->DATA ^= Blue; /* toggle Blue LED*/
+	TIMER3->ICR = 0x1; /* Timer1A timeout flag bit clears*/	 
+}

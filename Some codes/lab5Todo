@@ -1,0 +1,59 @@
+
+		PRESERVE8
+		THUMB
+
+		AREA RESET, DATA, READONLY
+		EXPORT __Vectors
+__Vectors
+	DCD 0x20001000 ; stack pointer value when stack is empty
+		DCD Reset_Handler ; reset vector
+		ALIGN
+;Your Data section
+;AREA DATA
+SUM DCD 0
+SUMP DCD SUM
+N DCD 7
+NUM1 DCD -5, -1, 2, -7, 4, -3, -2
+POINTER DCD NUM1
+	
+			AREA MYCODE, CODE, READONLY
+		ENTRY
+		EXPORT Reset_Handler
+
+CrossZero
+loop
+		SUB R1,R1,#1
+		CBZ R1,ende
+		LDR R4,[R0]
+		ADD R0,R0,#4
+		LDR R3,[R0]
+		CMP R4,#0
+		BLT min
+		BGE max
+		B loop
+		
+min
+		CMP R3,#0
+		BLT loop
+		BGE Add1
+max
+		CMP R3,#0
+		BGE loop
+		BLT Add1		
+Add1
+		ADD R2,R2,#1
+		B loop	
+		
+ende
+		BX LR	
+	
+Reset_Handler
+		LDR R0,POINTER
+		LDR R1,N
+
+		B CrossZero		
+	
+		
+Stop
+		B Stop
+END
